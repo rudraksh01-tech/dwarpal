@@ -28,7 +28,7 @@ const NODES = [
   {
     id: "judge",
     name: "Policy judge",
-    tech: "gpt-oss-safeguard-20b + written policy",
+    tech: "gpt-oss-120b + written policy",
     what: "Reads intent: does a weather tool really need your phone number? Catches the polite attacks the classifier misses. Verdicts are cached, so each text is judged once.",
   },
   {

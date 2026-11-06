@@ -49,9 +49,29 @@ The attacker doesn't have to shout. *"For accurate hyperlocal forecasts, put the
 
 - **Tool integrity.** Every tool's descriptor (name, description and the whole input schema) is pinned with SHA-256 when first approved. A later change hides the tool until a human re-approves it, and the change is shown as a diff plus a semantic-drift score.
 - **Data flow.** Private values that a sensitive server returns (phone, email, copied note text) are tracked for the session. A call that would carry them to an untrusted server is blocked before it leaves, whatever language the attack was written in.
-- **Content guards, cheapest first.** Multilingual rules (about 0.1 ms) → Meta Llama Prompt Guard 2 → a policy judge (`gpt-oss-safeguard-20b` with a written tool-poisoning policy) that reasons about intent. Model layers are skipped when a cheap check already found a sure attack, and verdicts are cached.
+- **Content guards, cheapest first.** Multilingual rules (about 0.1 ms) → Meta Llama Prompt Guard 2 → a policy judge (`gpt-oss-120b` with a written tool-poisoning policy) that reasons about intent. Model layers are skipped when a cheap check already found a sure attack, and verdicts are cached.
 - **Ask a human.** Borderline calls (your own phone number to a third-party tool) pause the LangGraph run with `interrupt()` and resume with the person's answer.
 - **Audit log.** Every decision, with its findings and per-node timings, goes to Postgres.
+
+## Use it with any MCP client
+
+Dwarpal is itself an MCP server (stdio). Point your client at Dwarpal and list your real servers in a config file:
+
+```json
+{
+  "servers": {
+    "files":   {"command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem", "."], "trusted": true, "sensitive": true},
+    "weather": {"url": "https://example.com/mcp", "trusted": false}
+  }
+}
+```
+
+```json
+// claude_desktop_config.json
+{"mcpServers": {"dwarpal": {"command": "python", "args": ["-m", "dwarpal.server", "--config", "C:/path/dwarpal.json"]}}}
+```
+
+`trusted` servers may receive the user's data; outputs of `sensitive` servers are tracked so they can't leak to untrusted ones. `python -m dwarpal.server --demo` serves the playground's three demo servers.
 
 ## Try it
 
@@ -77,6 +97,7 @@ RESULTS_PLACEHOLDER
 ```
 dwarpal/
   gateway.py          MCP proxy: list_tools / call_tool through the policy graph
+  server.py           Dwarpal as an MCP server (stdio) for Claude Desktop, Cursor or any client
   policy.py           LangGraph graph: integrity, dataflow, rules, prompt_guard, judge, decide, approval
   checks/
     descriptor.py     SHA-256 pinning, semantic drift, word-level diff

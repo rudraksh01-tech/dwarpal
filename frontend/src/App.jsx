@@ -12,7 +12,7 @@ const REPLAY_SECONDS = 14; // a recorded run is replayed in about this long
 const STACK = [
   ["Gateway", "Python 3.12, FastAPI, MCP Python SDK 2"],
   ["Policy graph", "LangGraph, with human-approval interrupts"],
-  ["Models", "Groq: gpt-oss-20b agent, Prompt Guard 2, gpt-oss-safeguard-20b judge"],
+  ["Models", "Groq: gpt-oss-20b agent, Prompt Guard 2 classifier, gpt-oss-120b policy judge"],
   ["Storage", "Postgres + pgvector (tool pins, audit log, known attacks)"],
   ["Cache", "Redis: verdict cache and rate limits"],
   ["Deploy", "Docker, Kubernetes, Helm (tested on kind in CI)"],

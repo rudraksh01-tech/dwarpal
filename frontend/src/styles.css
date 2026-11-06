@@ -99,8 +99,11 @@ h1 em, h2 em { font-style: italic; color: var(--cobalt-text); }
   max-width: var(--max);
   margin: 0 auto;
   padding: 18px 24px;
-  background: rgba(5, 5, 5, 0.94);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
+  /* paint the bar edge to edge while the content stays centred */
+  box-shadow: 0 0 0 100vmax var(--bg);
+  clip-path: inset(0 -100vmax);
 }
 
 .wordmark { font: 500 22px var(--serif); text-decoration: none; letter-spacing: 0.01em; }

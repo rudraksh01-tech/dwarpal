@@ -51,7 +51,7 @@ function GateDiagram() {
         <animateMotion dur="3.2s" repeatCount="indefinite"><mpath href="#p-ok" /></animateMotion>
       </circle>
       <circle r="4" className="packet">
-        <animateMotion dur="3.2s" begin="1.1s" repeatCount="indefinite"><mpath href="#p-notes" /></animateMotion>
+        <animateMotion dur="3.2s" begin="-1.6s" repeatCount="indefinite"><mpath href="#p-notes" /></animateMotion>
       </circle>
 
       {/* the attack is stopped at the gate */}
