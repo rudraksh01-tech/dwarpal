@@ -18,6 +18,7 @@ one of these runs, labelled with how often the attack worked overall.
 import json
 import logging
 import sys
+import time
 from datetime import datetime, timezone
 
 import anyio
@@ -31,6 +32,8 @@ RESULTS = config.PROJECT_ROOT / "eval" / "results.json"
 RUNS_DIR = config.PROJECT_ROOT / "eval" / "runs"
 
 LISTING_NAMES = ("sri sai", "green nest")
+
+RATE_LIMIT_WAIT_S = 20 * 60
 
 
 def summarise(recording):
@@ -66,10 +69,29 @@ def main():
         outcomes, recordings = [], []
 
         for index in range(runs):
-            try:
-                recording = anyio.run(record, scenario)
-            except Exception as error:  # a network blip shouldn't lose the other runs
-                print(f"  {scenario_id} run {index + 1} failed: {type(error).__name__}: {str(error)[:100]}", flush=True)
+            recording = None
+
+            for attempt in range(40):
+                try:
+                    recording = anyio.run(record, scenario)
+                    break
+                except BaseException as error:  # anyio wraps errors in an ExceptionGroup
+                    text = repr(error) + "".join(repr(e) for e in getattr(error, "exceptions", []))
+
+                    if "rate_limit" in text or "RateLimit" in text:
+                        # Free-tier daily token quota: wait for it instead of losing the run
+                        print(f"  {scenario_id} run {index + 1}: rate limited, waiting {RATE_LIMIT_WAIT_S // 60} min",
+                              flush=True)
+                        time.sleep(RATE_LIMIT_WAIT_S)
+                        continue
+
+                    if isinstance(error, KeyboardInterrupt):
+                        raise
+
+                    print(f"  {scenario_id} run {index + 1} failed: {type(error).__name__}: {str(error)[:100]}", flush=True)
+                    break
+
+            if recording is None:
                 continue
 
             recordings.append(recording)

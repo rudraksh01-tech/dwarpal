@@ -1,0 +1,24 @@
+# Render Blueprint: the Dwarpal API (gateway + playground backend) on the free plan.
+# New > Blueprint > pick this repo. Add GROQ_API_KEY and GEMINI_API_KEY when asked.
+# Free instances sleep after 15 minutes idle and take about a minute to wake;
+# the playground replays recorded runs meanwhile.
+services:
+  - type: web
+    name: dwarpal-api
+    runtime: docker
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DATABASE_URL        # optional: a free Neon Postgres with pgvector
+        sync: false
+      - key: REDIS_URL           # optional: a free Upstash Redis
+        sync: false
+      - key: DWARPAL_CORS_ORIGINS
+        value: https://dwarpal.vercel.app
+      - key: DWARPAL_RUNS_PER_MINUTE
+        value: "3"
