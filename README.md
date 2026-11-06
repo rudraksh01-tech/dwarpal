@@ -21,6 +21,7 @@
   <img alt="Postgres pgvector" src="https://img.shields.io/badge/Postgres-pgvector-4169E1?logo=postgresql&logoColor=white">
   <img alt="Redis" src="https://img.shields.io/badge/Redis-cache-DC382D?logo=redis&logoColor=white">
   <img alt="Kubernetes Helm" src="https://img.shields.io/badge/Kubernetes-Helm_chart-0F1689?logo=helm&logoColor=white">
+  <a href="https://github.com/rudraksh01-tech/dwarpal/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/rudraksh01-tech/dwarpal/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="Free tier only" src="https://img.shields.io/badge/cost-free_tier_only-6B7284">
 </p>
 
