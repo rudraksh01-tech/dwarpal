@@ -9,6 +9,9 @@ import { AgentPanel, AttackBrief, ScenarioPicker } from "./components/Playground
 
 const REPLAY_SECONDS = 14; // a recorded run is replayed in about this long
 
+// Recordings are static files next to the page (works under a sub-path like /dwarpal/)
+const RECORDINGS = `${import.meta.env.BASE_URL}recordings/`;
+
 const STACK = [
   ["Gateway", "Python 3.12, FastAPI, MCP Python SDK 2"],
   ["Policy graph", "LangGraph, with human-approval interrupts"],
@@ -53,9 +56,9 @@ export default function App() {
   const controller = useRef(null);
 
   useEffect(() => {
-    loadJSON("/recordings/scenarios.json").then(setScenarios).catch(() => setNotice("Could not load the scenarios."));
-    loadJSON("/recordings/checks.json").then(setExamples).catch(() => setExamples([]));
-    loadJSON("/recordings/eval.json").then(setEvalReport).catch(() => setEvalReport(null));
+    loadJSON(`${RECORDINGS}scenarios.json`).then(setScenarios).catch(() => setNotice("Could not load the scenarios."));
+    loadJSON(`${RECORDINGS}checks.json`).then(setExamples).catch(() => setExamples([]));
+    loadJSON(`${RECORDINGS}eval.json`).then(setEvalReport).catch(() => setEvalReport(null));
 
     // Wake the free-tier backend now, so it is warm by the time someone presses "Run live"
     if (API_URL) {
@@ -90,7 +93,7 @@ export default function App() {
 
     let recording;
     try {
-      recording = await loadJSON(`/recordings/${activeId}.json`);
+      recording = await loadJSON(`${RECORDINGS}${activeId}.json`);
     } catch {
       setNotice(
         !showOriginal && scenario?.original

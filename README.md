@@ -7,6 +7,7 @@
 </p>
 
 <p align="center">
+  <a href="https://rudraksh01-tech.github.io/dwarpal/"><b>Live demo</b></a> ·
   <a href="#try-it"><b>Playground</b></a> ·
   <a href="#results"><b>Results</b></a> ·
   <a href="#how-it-works"><b>How it works</b></a> ·
@@ -89,7 +90,7 @@ Every attack is shown in English by default; one click switches to the same atta
 | 5 | Fake service notice | Hinglish | weather tool's result |
 | 6 | Tool shadowing | Kanglish | weather description, targeting the trusted `search_pgs` |
 
-Replays are real recorded runs (`python -m demo.record`), so the page works instantly; "Run it live" calls the models when the free backend is awake.
+**[Open the playground →](https://rudraksh01-tech.github.io/dwarpal/)** Replays are real recorded runs (`python -m demo.record`), so the page works instantly; "Run it live" calls the models when the free backend is awake.
 
 ## Results
 
