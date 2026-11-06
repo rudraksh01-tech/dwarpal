@@ -55,6 +55,17 @@ The attacker doesn't have to shout. *"For accurate hyperlocal forecasts, put the
 - **Ask a human.** Borderline calls (your own phone number to a third-party tool) pause the LangGraph run with `interrupt()` and resume with the person's answer.
 - **Audit log.** Every decision, with its findings and per-node timings, goes to Postgres.
 
+## OWASP Top 10 for LLM applications
+
+Which risks from the [OWASP Top 10 for LLM Applications (2025)](https://genai.owasp.org/llm-top-10/) Dwarpal addresses, and how:
+
+| Risk | What Dwarpal does |
+|---|---|
+| **LLM01 Prompt Injection** (direct and indirect) | Checks tool descriptions and tool results with multilingual rules, Prompt Guard 2 and a policy judge; injected results are withheld from the agent. |
+| **LLM02 Sensitive Information Disclosure** | Tracks private values returned by sensitive servers and blocks calls that would carry them to an untrusted server. |
+| **LLM03 Supply Chain** | Pins every third-party tool's descriptor (SHA-256) and quarantines tools that change after approval (rug pulls). |
+| **LLM06 Excessive Agency** | Borderline calls (personal data to a third-party tool) pause the LangGraph run for a human to approve or deny. |
+
 ## Use it with any MCP client
 
 Dwarpal is itself an MCP server (stdio). Point your client at Dwarpal and list your real servers in a config file:
