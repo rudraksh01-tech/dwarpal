@@ -5,7 +5,7 @@ const NODES = [
     id: "integrity",
     name: "Tool integrity",
     tech: "SHA-256 pin + embedding drift",
-    what: "Remembers exactly what each tool said when it was approved. If a tool quietly rewrites itself later (a rug pull), it is hidden until a human re-approves it.",
+    what: "Remembers exactly what each tool said when it was approved. If a tool quietly rewrites itself later (a rug pull), it is quarantined until a human re-approves it: the agent sees its name, never its text.",
   },
   {
     id: "dataflow",

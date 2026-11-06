@@ -8,6 +8,7 @@ import json
 import time
 
 import anyio
+from groq import BadRequestError
 
 from dwarpal import config
 from dwarpal.checks.guards import groq_client
@@ -36,14 +37,35 @@ def to_openai_tools(tools):
     ]
 
 
-def _completion(messages, tools):
+def _create(messages, tools, tool_choice):
     return groq_client().chat.completions.create(
         model=config.GROQ_MODEL,
         messages=messages,
         tools=tools or None,
+        tool_choice=tool_choice if tools else None,
         temperature=0.2,
         reasoning_effort="low",
     )
+
+
+def _completion(messages, tools, first_round=False):
+    """The first round must use a tool: without it the small model sometimes
+    answers from memory and invents listings. Same rule on both sides.
+
+    Groq answers 400 when a "required" round produces no tool call; that
+    round is retried once, then falls back to "auto".
+    """
+    if not first_round:
+        return _create(messages, tools, "auto")
+
+    for _ in range(2):
+        try:
+            return _create(messages, tools, "required")
+        except BadRequestError as error:
+            if "did not call a tool" not in str(error):
+                raise
+
+    return _create(messages, tools, "auto")
 
 
 async def run_agent(user_request, tools, call_tool, on_step=None):
@@ -64,8 +86,8 @@ async def run_agent(user_request, tools, call_tool, on_step=None):
         if on_step:
             on_step(step)
 
-    for _ in range(MAX_ROUNDS):
-        response = await anyio.to_thread.run_sync(lambda: _completion(messages, openai_tools))
+    for round_index in range(MAX_ROUNDS):
+        response = await anyio.to_thread.run_sync(lambda: _completion(messages, openai_tools, round_index == 0))
         message = response.choices[0].message
 
         if not message.tool_calls:

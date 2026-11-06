@@ -64,7 +64,7 @@ function ToolChecks({ checks }) {
       <div className="row-body">
         <p>
           Dwarpal checked <strong>{checks.length} tools</strong> before the agent saw them
-          {hidden.length ? <>: <strong className="blocked-word">hid {hidden.length}</strong></> : ": all clean"}.
+          {hidden.length ? <>: <strong className="blocked-word">quarantined {hidden.length}</strong></> : ": all clean"}.
         </p>
         {hidden.map((check) => (
           <p className="row-detail" key={check.tool}>
@@ -77,7 +77,7 @@ function ToolChecks({ checks }) {
             {checks.map((check) => (
               <li key={`${check.server}/${check.tool}`} className={check.decision}>
                 <code>{check.server}/{check.tool}</code>
-                <span>{check.decision === "allow" ? (check.integrity === "unchanged" ? "unchanged" : "pinned") : "hidden"}</span>
+                <span>{check.decision === "allow" ? (check.integrity === "unchanged" ? "unchanged" : "pinned") : "quarantined"}</span>
               </li>
             ))}
           </ul>
@@ -128,9 +128,19 @@ function Step({ step, side }) {
     );
   }
 
+  if (step.type === "dwarpal_note") {
+    return (
+      <li className="row shield-row">
+        <span className="row-icon shield" aria-hidden="true" />
+        <div className="row-body">
+          <p><strong className="blocked-word">Refused</strong> <code>{step.tool}</code></p>
+          <p className="row-detail">{step.text.replace(/^\[Dwarpal\]\s*/, "")}</p>
+        </div>
+      </li>
+    );
+  }
+
   if (step.type === "tool_result") {
-    const blockedByDwarpal = step.text?.startsWith("[Dwarpal]");
-    if (blockedByDwarpal) return null; // the shield row already explains it
 
     return (
       <li className="row result">

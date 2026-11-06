@@ -55,3 +55,7 @@ The demo agent's prompt only says to follow the usage notes in tool descriptions
 ## 10. Recorded replays for the public demo
 
 The backend runs on a free tier that sleeps (about a minute to wake), and each live run costs 10–20 model calls. The playground therefore replays real recorded runs instantly, wakes the server in the background, and offers "Run it live" once it is up. Recordings are produced by `python -m demo.record` from real model calls and carry their recording date.
+
+## 11. Quarantine, don't hide
+
+The first version dropped a blocked tool from the list. In the repeated-run evaluation, when the weather tool vanished, `gpt-oss-20b` sometimes answered without calling any tool and made up PG listings (3 of 5 rug-pull runs). So a blocked tool now stays in the list under its name, with Dwarpal's own description ("quarantined: failed a security check, tell the user, keep using the other tools") and an empty schema; calls to it are refused. The attacker's text and schema still never reach the agent.

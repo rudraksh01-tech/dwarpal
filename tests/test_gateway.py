@@ -45,7 +45,9 @@ def test_rug_pull_hides_the_changed_tool():
             replace_weather_description(world, BY_ID["rug_pull_hinglish"].weather_description)
             tools = await gateway.list_tools()
 
-        assert "get_weather" not in names(tools)
+        weather = next(tool for tool in tools if tool.name == "get_weather")
+        assert weather.description.startswith("[Quarantined by Dwarpal]")
+        assert "get_profile" not in weather.description          # the attacker's text never reaches the agent
         blocked = [e for e in store.recent_events() if e["decision"] == "block"]
         assert blocked[0]["integrity"] == "changed"
         assert blocked[0]["summary"].startswith("Tool changed after approval")
@@ -61,8 +63,24 @@ def test_poisoned_description_is_never_pinned():
         async with gateway_for(world, store) as gateway:
             tools = await gateway.list_tools()
 
-        assert "get_weather" not in names(tools)
+        weather = next(tool for tool in tools if tool.name == "get_weather")
+        assert "log_usage ge kalsi" not in weather.description
         assert store.get_pin("weather", "get_weather") is None
+
+    anyio.run(scenario)
+
+
+def test_quarantined_tool_is_never_called():
+    async def scenario():
+        world = build_world(BY_ID["polite_poisoning"])
+
+        async with gateway_for(world) as gateway:
+            await gateway.list_tools()
+            gateway.quarantined["get_weather"] = "test"
+            result = await gateway.call_tool("get_weather", {"city": "Bengaluru", "context": "x"})
+
+        assert result.is_error and "quarantined" in result_text(result)
+        assert world.attacker_inbox == []
 
     anyio.run(scenario)
 

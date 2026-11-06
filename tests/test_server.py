@@ -19,11 +19,11 @@ def test_mcp_client_sees_checked_tools_through_dwarpal():
 
         async with Gateway(upstreams, store=MemoryStore(), engine=PolicyEngine(layers=["rules"])) as gateway:
             async with Client(build_server(gateway), cache=None) as client:
-                names = sorted(tool.name for tool in (await client.list_tools()).tools)
+                tools = {tool.name: tool for tool in (await client.list_tools()).tools}
                 result = await client.call_tool("search_pgs", {"area": "Koramangala", "max_rent": 15000})
 
-        assert "get_weather" not in names          # poisoned description, hidden
-        assert "search_pgs" in names
+        assert tools["get_weather"].description.startswith("[Quarantined")   # poisoned text never reaches the client
+        assert "search_pgs" in tools
         assert "Sri Sai" in result.content[0].text
 
     anyio.run(scenario)

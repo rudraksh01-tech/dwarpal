@@ -33,6 +33,13 @@ class Upstream:
     policy: ServerPolicy = field(default_factory=ServerPolicy)
 
 
+QUARANTINE_NOTE = (
+    "[Quarantined by Dwarpal] This tool from server '{server}' failed a security check ({reason}) and is "
+    "unavailable. Do not call it. Tell the user it is unavailable, and keep using the other tools for the rest "
+    "of the request."
+)
+
+
 def result_text(result):
     return "\n".join(block.text for block in result.content if getattr(block, "type", None) == "text")
 
@@ -46,6 +53,7 @@ class Gateway:
         self.on_event = on_event          # callback(event dict), e.g. to stream to the UI
         self.clients = {}
         self.routes = {}                  # exposed tool name -> (server, upstream tool name)
+        self.quarantined = {}             # exposed tool name -> why it is held back
         self.taint = TaintTracker()
         self._stack = None
 
@@ -79,7 +87,7 @@ class Gateway:
 
     async def list_tools(self):
         """Tools the agent may see, after the descriptor checks."""
-        exposed, self.routes = [], {}
+        exposed, self.routes, self.quarantined = [], {}, {}
         seen_names = {}
 
         for server, client in self.clients.items():
@@ -102,6 +110,17 @@ class Gateway:
                 })
 
                 if verdict.decision != "allow":
+                    # Quarantine instead of silently dropping: the agent keeps the tool's
+                    # name (so it can tell the user why it's unavailable) but never sees
+                    # the provider's text or schema, and calls to it are refused.
+                    name = tool.name if tool.name not in seen_names else f"{server}__{tool.name}"
+                    seen_names[name] = server
+                    self.quarantined[name] = verdict.summary
+                    exposed.append(tool.model_copy(update={
+                        "name": name,
+                        "description": QUARANTINE_NOTE.format(server=server, reason=verdict.summary),
+                        "input_schema": {"type": "object", "properties": {}},
+                    }))
                     continue
 
                 if pin is None:
@@ -124,6 +143,12 @@ class Gateway:
                                 descriptor.model_visible_text(), True, history))
 
     async def call_tool(self, name, arguments):
+        if name in self.quarantined:
+            return CallToolResult(content=[TextContent(
+                type="text", text=f"[Dwarpal] {name} is quarantined ({self.quarantined[name]}). "
+                                  "It was not called. Tell the user this tool is unavailable and continue with the others.")],
+                is_error=True)
+
         if name not in self.routes:
             return CallToolResult(content=[TextContent(type="text", text=f"Unknown or blocked tool: {name}")], is_error=True)
 

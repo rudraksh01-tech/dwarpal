@@ -80,7 +80,7 @@ SIGNALS = {
 
     # "Send the phone number / notes / password to ..."
     "exfiltration": (0.5, _group(
-        r"\b(send|forward|post|upload|leak|share|email|transmit|exfiltrate|copy)\b.{0,60}?\b(phone|number|contact|password|passwords|otp|notes?|profile|email|address|aadhaar|pan|secret|token|api\s?key|credentials?|history|conversation)\b",
+        r"\b(send|forward|post|upload|leak|share|transmit|exfiltrate|copy)\b.{0,60}?\b(phone|number|contact|password|passwords|otp|notes?|profile|email|address|aadhaar|pan|secret|token|api\s?key|credentials?|history|conversation)\b",
         r"\b(phone|number|password|otp|notes?|profile|aadhaar|token|api\s?key|credentials?)\b.{0,60}?\b(bhej|send\s+kar|forward\s+kar|share\s+kar|daal\s+do|kalis\w*|kalsu|kodu|kaLis\w*)",
         r"(फ़ोन|फोन|नंबर|पासवर्ड|ओटीपी|नोट्स|प्रोफ़ाइल|आधार)\S*.{0,60}?(भेज|फ़ॉरवर्ड|शेयर)",
         r"(भेज|फ़ॉरवर्ड|शेयर)\S*.{0,60}?(फ़ोन|फोन|नंबर|पासवर्ड|नोट्स|प्रोफ़ाइल|आधार)",

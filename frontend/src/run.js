@@ -59,7 +59,14 @@ export function timeline(items) {
       continue;
     }
 
-    rows.push({ ...item.data, t: item.t });
+    const step = item.data;
+    if (step.type === "tool_result" && step.text?.startsWith("[Dwarpal]")) {
+      // A blocked call or result already has its shield row; a quarantined tool gets one here
+      if (rows[rows.length - 1]?.type !== "shield") rows.push({ type: "dwarpal_note", t: item.t, tool: step.tool, text: step.text });
+      continue;
+    }
+
+    rows.push({ ...step, t: item.t });
   }
 
   return rows;
