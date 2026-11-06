@@ -1,0 +1,37 @@
+# Full stack on one machine: gateway API + Postgres (pgvector) + Redis.
+#   docker compose up --build
+# Keys are read from .env (see .env.example).
+
+services:
+  api:
+    build: .
+    ports: ["8000:8000"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://dwarpal:dwarpal@postgres:5432/dwarpal
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: dwarpal
+      POSTGRES_PASSWORD: dwarpal
+      POSTGRES_DB: dwarpal
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dwarpal"]
+      interval: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
+
+volumes:
+  pgdata:

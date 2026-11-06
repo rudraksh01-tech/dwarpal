@@ -1,0 +1,49 @@
+# Gateway + demo API
+image:
+  repository: dwarpal
+  tag: local
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8000
+
+# API keys. Prefer an existing secret:
+#   kubectl create secret generic dwarpal-keys \
+#     --from-literal=GROQ_API_KEY=... --from-literal=GEMINI_API_KEY=... --from-literal=DATABASE_URL=...
+existingSecret: ""
+keys:
+  groqApiKey: ""
+  geminiApiKey: ""
+
+env:
+  DWARPAL_CORS_ORIGINS: "http://localhost:5173"
+  DWARPAL_RUNS_PER_MINUTE: "3"
+
+resources:
+  requests: { cpu: 100m, memory: 192Mi }
+  limits: { cpu: 500m, memory: 512Mi }
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 70
+
+# In-cluster Postgres with pgvector (turn off and set externalDatabaseUrl to use Neon)
+postgres:
+  enabled: true
+  image: pgvector/pgvector:pg17
+  storage: 1Gi
+  user: dwarpal
+  password: dwarpal
+  database: dwarpal
+externalDatabaseUrl: ""
+
+# In-cluster Redis (turn off and set externalRedisUrl to use Upstash)
+redis:
+  enabled: true
+  image: redis:7-alpine
+externalRedisUrl: ""

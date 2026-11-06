@@ -1,0 +1,6 @@
+Dwarpal is starting.
+
+  kubectl port-forward svc/{{ include "dwarpal.name" . }} 8000:{{ .Values.service.port }}
+  curl http://localhost:8000/api/health
+
+The health response shows which store (postgres+pgvector) and cache (redis) are in use.

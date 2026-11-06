@@ -1,0 +1,31 @@
+# `helm test` runs this pod. It passes only if the API is up and reports the
+# in-cluster Postgres (pgvector) and Redis as its store and cache.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ include "dwarpal.name" . }}-test-health
+  labels:
+    {{- include "dwarpal.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: check
+      image: curlimages/curl:8.11.1
+      env:
+        - name: URL
+          value: "http://{{ include "dwarpal.name" . }}:{{ .Values.service.port }}/api/health"
+        - name: WANT_STORE
+          value: {{ ternary "postgres+pgvector" "memory" .Values.postgres.enabled | quote }}
+        - name: WANT_CACHE
+          value: {{ ternary "redis" "memory" .Values.redis.enabled | quote }}
+      command: ["sh", "-c"]
+      args:
+        - |
+          body=$(curl -fsS "$URL") || exit 1
+          echo "$body"
+          echo "$body" | grep -q '"status":"ok"' || exit 1
+          echo "$body" | grep -q "\"store\":\"$WANT_STORE\"" || exit 1
+          echo "$body" | grep -q "\"cache\":\"$WANT_CACHE\"" || exit 1
+          echo passed

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dwarpal
+description: Security gateway for MCP agents, with Postgres (pgvector) and Redis
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
