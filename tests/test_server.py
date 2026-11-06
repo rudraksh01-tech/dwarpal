@@ -14,7 +14,7 @@ from dwarpal.store import MemoryStore
 
 def test_mcp_client_sees_checked_tools_through_dwarpal():
     async def scenario():
-        world = build_world(BY_ID["shadowing_kanglish"])
+        world = build_world(BY_ID["shadowing__original"])
         upstreams = [Upstream(name, server, POLICIES[name]) for name, server in world.servers().items()]
 
         async with Gateway(upstreams, store=MemoryStore(), engine=PolicyEngine(layers=["rules"])) as gateway:

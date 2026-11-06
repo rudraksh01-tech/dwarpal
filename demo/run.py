@@ -1,6 +1,6 @@
 """Run one scenario on both sides: the agent without protection, and through Dwarpal.
 
-    python -m demo.run rug_pull_hinglish
+    python -m demo.run polite_poisoning
 """
 
 import logging
@@ -134,7 +134,7 @@ async def run_both(scenario):
 
 def main():
     logging.getLogger("httpx").setLevel(logging.WARNING)
-    scenario_id = sys.argv[1] if len(sys.argv) > 1 else "rug_pull_hinglish"
+    scenario_id = sys.argv[1] if len(sys.argv) > 1 else "polite_poisoning"
     scenario = BY_ID.get(scenario_id) or custom_scenario(scenario_id)
     result = anyio.run(run_both, scenario)
 

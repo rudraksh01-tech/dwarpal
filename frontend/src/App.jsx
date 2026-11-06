@@ -39,11 +39,13 @@ function Header({ live }) {
 export default function App() {
   const [scenarios, setScenarios] = useState([]);
   const [examples, setExamples] = useState([]);
-  const [selected, setSelected] = useState("rug_pull_hinglish");
+  const [selected, setSelected] = useState("polite_poisoning");
+  const [showOriginal, setShowOriginal] = useState(false);
   const [run, setRun] = useState(emptyRun());
   const [mode, setMode] = useState(null); // "replay" | "live" while running
   const [recordedAt, setRecordedAt] = useState(null);
   const [sample, setSample] = useState(null);
+  const [askedRequest, setAskedRequest] = useState(null); // the question the recorded run really used
   const [evalReport, setEvalReport] = useState(null);
   const [live, setLive] = useState(API_URL ? "waking" : "offline");
   const [notice, setNotice] = useState("");
@@ -69,6 +71,8 @@ export default function App() {
   }, []);
 
   const scenario = scenarios.find((item) => item.id === selected);
+  // The recording / live run to use: the English attack, or its Indian-language version
+  const activeId = showOriginal && scenario?.original ? scenario.original.id : selected;
   const running = mode !== null;
   const decision = useMemo(() => keyDecision(run.protected.items), [run.protected.items]);
 
@@ -86,14 +90,19 @@ export default function App() {
 
     let recording;
     try {
-      recording = await loadJSON(`/recordings/${selected}.json`);
+      recording = await loadJSON(`/recordings/${activeId}.json`);
     } catch {
-      setNotice("No recording for this scenario yet.");
+      setNotice(
+        !showOriginal && scenario?.original
+          ? `The English run of this attack is still being recorded. Switch the attack language to ${scenario.original.language} to replay a real run now.`
+          : "No recording for this scenario yet."
+      );
       return;
     }
 
     setRecordedAt(recording.recorded_at);
     setSample(recording.sample || null);
+    setAskedRequest(recording.user_request || null);
     setMode("replay");
 
     // Both sides start together; each keeps its own real timing, compressed
@@ -120,7 +129,7 @@ export default function App() {
     controller.current = new AbortController();
 
     try {
-      await runLive({ scenario: selected, signal: controller.current.signal, onEvent: (event) => setRun((state) => applyEvent(state, event)) });
+      await runLive({ scenario: activeId, signal: controller.current.signal, onEvent: (event) => setRun((state) => applyEvent(state, event)) });
     } catch (error) {
       if (error.name !== "AbortError") {
         setNotice(`${error.message} You can still replay the recorded run.`);
@@ -134,9 +143,11 @@ export default function App() {
   const choose = (id) => {
     stop();
     setSelected(id);
+    setShowOriginal(false);
     setRun(emptyRun());
     setRecordedAt(null);
     setSample(null);
+    setAskedRequest(null);
   };
 
   return (
@@ -156,7 +167,12 @@ export default function App() {
           </div>
 
           <ScenarioPicker scenarios={scenarios} selected={selected} onSelect={choose} disabled={false} />
-          <AttackBrief scenario={scenario} />
+          <AttackBrief
+            scenario={scenario}
+            showOriginal={showOriginal}
+            disabled={running}
+            onToggle={(value) => { stop(); setShowOriginal(value); setRun(emptyRun()); setRecordedAt(null); setSample(null); setAskedRequest(null); }}
+          />
 
           <div className="run-bar">
             <button className="button primary" onClick={replay} disabled={running || !scenario}>
@@ -183,8 +199,8 @@ export default function App() {
           {notice && <p className="notice">{notice}</p>}
 
           <div className="panels">
-            <AgentPanel side="unprotected" state={run.unprotected} userRequest={scenario?.user_request} />
-            <AgentPanel side="protected" state={run.protected} userRequest={scenario?.user_request} />
+            <AgentPanel side="unprotected" state={run.unprotected} userRequest={askedRequest || scenario?.user_request} />
+            <AgentPanel side="protected" state={run.protected} userRequest={askedRequest || scenario?.user_request} />
           </div>
         </section>
 

@@ -473,3 +473,15 @@ textarea:focus { outline: none; border-color: var(--cobalt-text); }
   .headline-numbers { grid-template-columns: 1fr; }
   .headline-numbers > div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--line); }
 }
+
+/* ---------- attack language switch ---------- */
+
+.language-switch { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 22px; }
+.switch-label { width: 100%; margin: 0 0 4px !important; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint) !important; }
+.language-switch button {
+  padding: 6px 14px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: none; color: var(--muted); font: 500 13px var(--sans); cursor: pointer;
+}
+.language-switch button.on { border-color: var(--cobalt-text); background: var(--cobalt-soft); color: var(--text); }
+.language-switch button:disabled { opacity: 0.5; cursor: not-allowed; }
+.switch-note { width: 100%; margin: 8px 0 0 !important; font-size: 13px; color: var(--faint) !important; }

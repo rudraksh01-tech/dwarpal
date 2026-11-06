@@ -36,13 +36,13 @@ def test_clean_world_exposes_every_tool_and_pins_them():
 
 def test_rug_pull_hides_the_changed_tool():
     async def scenario():
-        world = build_world(BY_ID["rug_pull_hinglish"])
+        world = build_world(BY_ID["rug_pull__original"])
         store = MemoryStore()
 
         async with gateway_for(world, store) as gateway:
             assert "get_weather" in names(await gateway.list_tools())
 
-            replace_weather_description(world, BY_ID["rug_pull_hinglish"].weather_description)
+            replace_weather_description(world, BY_ID["rug_pull__original"].weather_description)
             tools = await gateway.list_tools()
 
         weather = next(tool for tool in tools if tool.name == "get_weather")
@@ -57,7 +57,7 @@ def test_rug_pull_hides_the_changed_tool():
 
 def test_poisoned_description_is_never_pinned():
     async def scenario():
-        world = build_world(BY_ID["shadowing_kanglish"])
+        world = build_world(BY_ID["shadowing__original"])
         store = MemoryStore()
 
         async with gateway_for(world, store) as gateway:
@@ -87,7 +87,7 @@ def test_quarantined_tool_is_never_called():
 
 def test_injected_result_is_withheld_from_the_agent():
     async def scenario():
-        world = build_world(BY_ID["result_injection_kannada"])
+        world = build_world(BY_ID["result_injection__original"])
 
         async with gateway_for(world) as gateway:
             await gateway.list_tools()

@@ -19,7 +19,6 @@ export function ScenarioPicker({ scenarios, selected, onSelect, disabled }) {
           <span className="scenario-index">{String(index + 1).padStart(2, "0")}</span>
           <span className="scenario-title">{scenario.title}</span>
           <span className="scenario-meta">
-            <span className="tag">{scenario.language}</span>
             <span className="tag quiet">{scenario.attack_type === "none" ? "control run" : scenario.attack_type.replaceAll("_", " ")}</span>
           </span>
         </button>
@@ -28,25 +27,39 @@ export function ScenarioPicker({ scenarios, selected, onSelect, disabled }) {
   );
 }
 
-export function AttackBrief({ scenario }) {
+export function AttackBrief({ scenario, showOriginal, onToggle, disabled }) {
   if (!scenario) return null;
   const isControl = scenario.attack_type === "none";
+  const original = scenario.original;
+  const shown = showOriginal && original ? original : scenario;
 
   return (
     <div className="brief">
       <div className="brief-text">
         <h3>{isControl ? "No attack in this run" : "What the attacker did"}</h3>
         <p>{scenario.explain}</p>
+        {original && (
+          <div className="language-switch" role="group" aria-label="Language of the attack">
+            <p className="switch-label">Attack language</p>
+            <button className={!showOriginal ? "on" : ""} onClick={() => onToggle(false)} disabled={disabled}>English</button>
+            <button className={showOriginal ? "on" : ""} onClick={() => onToggle(true)} disabled={disabled}>{original.language}</button>
+            <p className="switch-note">
+              {showOriginal
+                ? `The same attack written in ${original.language}. English-trained guards often miss these; Dwarpal checks every language.`
+                : `Switch to see the same attack in ${original.language}.`}
+            </p>
+          </div>
+        )}
       </div>
 
       {!isControl && (
         <figure className="evidence">
           <figcaption>
-            Hidden in the weather server's <strong>{scenario.rug_pull ? "new tool description" : scenario.where}</strong>
+            Hidden in the weather server's <strong>{shown.rug_pull ? "new tool description" : shown.where}</strong>
           </figcaption>
-          <blockquote lang={LANGUAGE_SCRIPT[scenario.language]}>{scenario.attack_text}</blockquote>
-          {scenario.meaning && (
-            <p className="meaning"><span>In English:</span> {scenario.meaning}</p>
+          <blockquote lang={LANGUAGE_SCRIPT[shown.language]}>{shown.attack_text}</blockquote>
+          {showOriginal && shown.meaning && (
+            <p className="meaning"><span>In English:</span> {shown.meaning}</p>
           )}
         </figure>
       )}

@@ -62,7 +62,7 @@ jobs:
           docker run -d --name api -p 8000:8000 dwarpal:ci
           for i in $(seq 1 30); do curl -fs localhost:8000/api/health && break; sleep 1; done
           curl -fs localhost:8000/api/health | grep -q '"status":"ok"'
-          curl -fs localhost:8000/api/scenarios | grep -q rug_pull_hinglish
+          curl -fs localhost:8000/api/scenarios | grep -q polite_poisoning
           docker images dwarpal:ci --format 'Image size: {{.Size}}'
 
       - uses: azure/setup-helm@v4

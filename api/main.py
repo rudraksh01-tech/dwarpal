@@ -16,7 +16,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from demo.run import run_protected, run_unprotected
-from demo.scenarios import BY_ID, SCENARIOS, custom_scenario
+from demo.scenarios import BY_ID, ORIGINAL_SUFFIX, SCENARIOS, custom_scenario
 from dwarpal import config, embeddings
 from dwarpal.cache import get_cache
 from dwarpal.checks import guards
@@ -65,16 +65,32 @@ def health():
     }
 
 
+def scenario_card(s):
+    is_result = s.result_suffix != ""
+    return {
+        "id": s.id, "title": s.title, "language": s.language, "attack_type": s.attack_type,
+        "explain": s.explain, "meaning": s.meaning, "user_request": s.user_request,
+        "attack_text": s.result_suffix if is_result else s.weather_description,
+        "where": "tool result" if is_result else "tool description",
+        "rug_pull": s.rug_pull,
+    }
+
+
 @app.get("/api/scenarios")
 def scenarios():
-    return [
-        {"id": s.id, "title": s.title, "language": s.language, "attack_type": s.attack_type,
-         "explain": s.explain, "meaning": s.meaning, "user_request": s.user_request,
-         "attack_text": s.weather_description if s.weather_description != BY_ID["clean"].weather_description
-         else s.result_suffix, "where": "tool description" if s.result_suffix == "" else "tool result",
-         "rug_pull": s.rug_pull}
-        for s in SCENARIOS
-    ]
+    """English attacks, each with its Indian-language version under "original"."""
+    cards = []
+
+    for s in SCENARIOS:
+        card = scenario_card(s)
+        original = BY_ID.get(s.id + ORIGINAL_SUFFIX)
+
+        if original:
+            card["original"] = scenario_card(original)
+
+        cards.append(card)
+
+    return cards
 
 
 class RunRequest(BaseModel):
